@@ -1,0 +1,90 @@
+CESM2-WACCM,historical,r1i1p1f1,gn,empty repository for tasmax
+CESM2,historical,r1i1p1f1,gn,empty repository for tasmax
+CMCC-ESM2,ssp534-over,r1i1p1f1,gn,supposed to start in 2040 but start in 2015 with different evolutions from ssp585
+EC-Earth3,historical,r3i1p1f1,gr,HDF error 1850
+EC-Earth3,historical,r13i1p1f1,gr,missing 31.12.2002
+EC-Earth3,historical,r20i1p1f1,gr,HDF error 1852
+EC-Earth3,historical,r101i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r102i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r103i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r104i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r105i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r106i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r107i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r108i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r109i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r110i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r111i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r112i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r113i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r114i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r115i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r116i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r117i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r118i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r119i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r120i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r121i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r122i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r123i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r124i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r125i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r126i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r127i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r128i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r129i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r130i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r131i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r132i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r133i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r134i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r135i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r136i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r137i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r138i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r139i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r140i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r141i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r142i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r143i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r144i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r145i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r146i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r147i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r148i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r149i1p1f1,gr,missing before 1970
+EC-Earth3,historical,r150i1p1f1,gr,missing before 1970
+EC-Earth3,ssp245,r10i1p1f1,gr,HDF error 2086
+EC-Earth3-Veg,historical,r10i1p1f1,gr,missing 1891
+EC-Earth3-Veg,historical,r20i1p1f1,gr,HDF error 1852 
+IITM-ESM,ssp126,r1i1p1f1,gn,missing 2100
+FGOALS-g3,ssp534-over,r1i1p1f1,gn,supposed to start in 2040 but start in 2015 with different evolutions from ssp585
+KIOST-ESM,ssp126,r1i1p1f1,gr1,missing 2023 on hurs
+KIOST-ESM,ssp245,r1i1p1f1,gr1,missing 2058 on hurs
+MIROC6,ssp245,r4i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r5i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r6i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r7i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r8i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r9i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r10i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r11i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r12i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r13i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r14i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r15i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r16i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r17i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r18i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r19i1p1f1,gn,only up to 2039
+MIROC6,ssp245,r20i1p1f1,gn,only up to 2039
+MIROC-ES2L,ssp534-over,r1i1p1f2,gn,supposed to start in 2040 but start in 2015 with different evolutions from ssp585
+MPI-ESM-1-2-HAM,ssp370,r1i1p1f1,gn,variables only up to 2055
+MPI-ESM-1-2-HAM,ssp370,r2i1p1f1,gn,variables only up to 2055
+MPI-ESM-1-2-HAM,ssp370,r3i1p1f1,gn,variables only up to 2055
+NorESM2-LM,ssp126,r1i1p1f1,gn,missing days in hurs, pr and tasmax
+NorESM2-LM,ssp370,r2i1p1f1,gn,only 2015 to 2054
+NorESM2-LM,ssp370,r3i1p1f1,gn,only 2015 to 2054
+NorESM2-MM,historical,r3i1p1f1,gn, missing 1943.6.22 to 1949.12.12
+SAM0-UNICON,historical,r1i1p1f1,gn,missing 1.1.1950
+UKESM1-0-LL,historical,r14i1p1f2,gn,missing 1927-1946

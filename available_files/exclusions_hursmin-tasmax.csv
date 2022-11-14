@@ -1,0 +1,35 @@
+CMCC-ESM2,ssp534-over,r1i1p1f1,gn,starts in 2015 but is different from ssp585 up to 2040
+EC-Earth3,historical,r3i1p1f1,gr,HDF error in tasmax of [EC-Earth3 | historical | r3i1p1f1 | gr]
+EC-Earth3,historical,r13i1p1f1,gr,Missing 1 day (2002-12-31) in [EC-Earth3 | historical | r13i1p1f1 | gr]. NOT ONLY need to shift by 1 day because of 1849-12-31 and 2014-12-30 BUT ALSO missing this 2002-12-31...
+EC-Earth3,historical,r20i1p1f1,gr,HDF error in tasmax of [EC-Earth3 | historical | r20i1p1f1 | gr]
+EC-Earth3-Veg,historical,r10i1p1f1,gr,1964 file missing for [EC-Earth3-Veg | historical | r10i1p1f1 | gr] :: even missing according to https://esgf-data.dkrz.de/search/cmip6-dkrz/
+FGOALS-g3,ssp534-over,r1i1p1f1,gn,starts in 2015 but is different from ssp585 up to 2040
+KACE-1-0-G,historical,r1i1p1f1,gr,NaN values (and often >100%) on hursmin in r1i1p1f1 r2i1p1f1 & r3i1p1f1 of KACE-1-0-G for historical
+KACE-1-0-G,historical,r2i1p1f1,gr,NaN values (and often >100%) on hursmin in r1i1p1f1 r2i1p1f1 & r3i1p1f1 of KACE-1-0-G for historical
+KACE-1-0-G,historical,r3i1p1f1,gr,NaN values (and often >100%) on hursmin in r1i1p1f1 r2i1p1f1 & r3i1p1f1 of KACE-1-0-G for historical
+KIOST-ESM,ssp126,r1i1p1f1,gr1,only 2015 available for [KIOST-ESM | ssp126 | r1i1p1f1 | gr1]
+KIOST-ESM,ssp245,r1i1p1f1,gr1,up to 2019 available for [KIOST-ESM | ssp245 | r1i1p1f1 | gr1]
+KIOST-ESM,ssp585,r1i1p1f1,gr1,up to 2018 available for [KIOST-ESM | ssp585 | r1i1p1f1 | gr1]
+MIROC-ES2L,ssp126,r3i1p1f2,gn,HDF error in 2094-12-09 of [MIROC-ES2L | ssp126 | r3i1p1f2 | gn]
+MIROC6,ssp245,r4i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r5i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r6i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r7i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r8i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r9i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r10i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r11i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r12i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r13i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r14i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r15i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r16i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r17i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r18i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r19i1p1f1,gn,end in 2039 makes this run useless
+MIROC6,ssp245,r20i1p1f1,gn,end in 2039 makes this run useless
+MIROC-ES2L,ssp534-over,r1i1p1f2,gn,starts in 2015 but is different from ssp585 up to 2040
+MPI-ESM-1-2-HAM,ssp370,r1i1p1f1,gn,ends in 2039 makes this run useless
+MPI-ESM-1-2-HAM,ssp370,r2i1p1f1,gn,ends in 2039 makes this run useless
+MPI-ESM-1-2-HAM,ssp370,r3i1p1f1,gn,ends too early makes this run useless
+SAM0-UNICON,historical,r1i1p1f1,gn,missing 1.1.1950

@@ -1,0 +1,10 @@
+# not including cmip6-ng
+cmip6_ng_master
+
+# not including folder of figures
+figures
+
+# not including useless files
+.ipynb_checkpoints
+__pycache__
+stash.py
