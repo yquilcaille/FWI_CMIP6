@@ -8,10 +8,49 @@ import xarray as xr
 
 class configuration_FWI_CMIP6:
     """
-    The initialization of this class gathers all options used for calculation of FWI on CMIP6 data.
-    'func_prepare_files' is then used for preparing all the files that will be used, such as the runs to use, the exceptions, etc.
+    Class used for the calculation of the FWI on CMIP6 data.
 
-    NB: Used during calculation of the FWI from CMIP6 data.
+    Parameters
+    ----------
+    type_variables: str
+        String to identify the combination of variables to use. Structure must be VAR1 + '-' + VAR2, with:
+            - VAR1 in ["hurs", "hursmin", "hursmax"]
+            - VAR2 in ["tas", "tasmin", "tasmax"]
+    adjust_DryingFactor: str
+        Option for the "drying factor" used in calculation of DC. The name in the original algorithm is "Day-length adjustment in DC". It is changed here to avoid confusion with adjustments on effective day length, used in DMC.
+            - 'original': values for the Northern hemisphere applied everywhere (Wagner et al, 1987: https://cfs.nrcan.gc.ca/pubwarehouse/pdfs/19927.pdf)
+            - 'NSH': the values for the Southern hemisphere are those for the northern shifted by 6 months (https://github.com/buckinha/pyfwi/blob/master/pyFWI/FWIFunctions.py)
+            - 'NSHeq': the same idea is applied, but near the equator, one same value is applied for all months (https://rdrr.io/rforge/cffdrs/src/R/dcCalc.R)
+    adjust_DayLength: str
+        Option for the effective day length, used in calculation of DMC.
+            - 'original': values adapted for Canadian latitudes, depends on the month (Wagner et al, 1987: https://cfs.nrcan.gc.ca/pubwarehouse/pdfs/19927.pdf)
+            - 'bins': depends on 4 bins of latitudes and the month (https://github.com/buckinha/pyfwi/blob/master/pyFWI/FWIFunctions.py)
+            - 'continuous': depends continuously on latitude and the day of the year (https://github.com/NCAR/fire-indices & https://www.ncl.ucar.edu/Document/Functions/Crop/daylight_fao56.shtml)
+    adjust_overwinterDC: str
+        Option for the overwintering of DC.
+            - 'original': without.
+            - 'wDC': with overwintering (code based on Lawson & Armitage (2008) (http://cfs.nrcan.gc.ca/pubwarehouse/pdfs/29152.pdf) and https://rdrr.io/github/jordan-evens-nrcan/cffdrs/src/R/fireSeason.r)
+    limits_on_data: dict
+        Dictionnary informing which experiments, members and esms to take.
+            Example 1: only historical and ssp585 of ACCESS-CM2 on r1i1p1f1 would be: {'xps':['historical','ssp585'], 'members':['r1i1p1f1'], 'esms':['ACCESS-CM2']}
+            Example 2: everything would be: {'xps':None, 'members':None, 'esms':None}
+    path_cmip6: str
+        Path of CMIP6 data. Please mind that the code may have to be adapted depending on the architecture of your repositories.
+    path_save: str
+        Path of where to save the outputs. A repository will be created inside, its name depending on the options chosen for the configuration.
+    overwrite_path_saveFWI: str
+        If not None, path that overwrites where to save the FWI.
+    option_overwrite: bool
+        If the run has already been computed, option to confirm whether it needs to be run and overwriten again.
+    overwrite_before: str
+        If "option_overwrite" is True, will run & overwrite only those before this date. Format of this date must be: "YYYY-MM-DDTHH:MM:SS"  # Year, Month, Day, Hour, Minute, Second
+    option_load_available: bool
+        Whether need to produce the list of available files, or load the former saved list
+    option_calc_size: bool
+        Whether need to calculate the size of all files for all variables / esm / xp / member / common  and  those that are present for all variables. Warning, takes some time.
+    option_full_outputs: bool
+        WARNING, TO USE *VERY* CAUTIOUSLY!! TAKES A LOT OF MEMORY, BOTH IN RAM AND STORAGE.
+        If True, returns all intermediary variables (DC, DMC, ...), used for debugging or sensitivity analysis.
     """
 
     # --------------------
@@ -446,14 +485,12 @@ def convert_wind(wind_cmip6, k_time):
     """
     Converts m s-1 to kph.
 
-    args:
-        wind_cmip6: DataArray
-            data for the wind in CMIP6. Must have a 'time' axis.
-
-        k_time: float
-            Index of a timestep
-
-    NB: Used during calculation of the FWI from CMIP6 data.
+    Parameters
+    ----------
+    wind_cmip6: DataArray
+        data for the wind in CMIP6. Must have a 'time' axis.
+    k_time: float
+        Index of a timestep
     """
     if wind_cmip6.units not in ["m s-1"]:
         raise Exception("Unprepared unit for the wind: " + wind_cmip6.units)
@@ -465,14 +502,12 @@ def convert_temp(temp_cmip6, k_time):
     """
     Converts K to degC.
 
-    args:
-        temp_cmip6: DataArray
-            data for the temperature in CMIP6. Must have a 'time' axis.
-
-        k_time: float
-            Index of a timestep
-
-    NB: Used during calculation of the FWI from CMIP6 data.
+    Parameters
+    ----------
+    temp_cmip6: DataArray
+        data for the temperature in CMIP6. Must have a 'time' axis.
+    k_time: float
+        Index of a timestep
     """
     if temp_cmip6.units not in ["K"]:
         raise Exception("Unprepared unit for the temperature: " + temp_cmip6.units)
@@ -484,14 +519,12 @@ def convert_rain(rain_cmip6, k_time):
     """
     Converts kg m-2 s-1 to 24-hour accumulated rainfall in mm.
 
-    args:
-        rain_cmip6: DataArray
-            data for the precipitations in CMIP6. Must have a 'time' axis.
-
-        k_time: float
-            Index of a timestep
-
-    NB: Used during calculation of the FWI from CMIP6 data.
+    Parameters
+    ----------
+    rain_cmip6: DataArray
+        data for the precipitations in CMIP6. Must have a 'time' axis.
+    k_time: float
+        Index of a timestep
     """
     if rain_cmip6.units not in ["kg m-2 s-1"]:
         raise Exception("Unprepared unit for the rain: " + rain_cmip6.units)
@@ -503,14 +536,12 @@ def convert_rh(rh_cmip6, k_time):
     """
     Just a check of unit and selection of year.
 
-    args:
-        rh_cmip6: DataArray
-            data for the relative humidity in CMIP6. Must have a 'time' axis.
-
-        k_time: float
-            Index of a timestep
-
-    NB: Used during calculation of the FWI from CMIP6 data.
+    Parameters
+    ----------
+    rh_cmip6: DataArray
+        data for the relative humidity in CMIP6. Must have a 'time' axis.
+    k_time: float
+        Index of a timestep
     """
     #
     if rh_cmip6.units not in ["%"]:
@@ -521,22 +552,23 @@ def convert_rh(rh_cmip6, k_time):
 
 def prepare_variables_FWI(former_calc, DATA, k_time, cfg):
     """
-    function used to prepare everything required for calculation of the FWI on this current day
+    Function used to prepare everything required for calculation of the FWI on this current day
 
-    args:
-        former_calc: variables at the day before. Used when overwintering DC, to carry tasmax over the 2 days before, the current day and the next 2 days
+    Parameters
+    ----------
+    former_calc: dictionary
+        Variables for computation of the FWI at the former day
+    DATA: xarrays
+        Data produced by "func_prepare_datasets".
+    k_time: int
+        position of the timestep (better than value of the timestep, because of overwintering DC)
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
 
-        DATA: variables used for calculation of FWI. Must have inputs for:
-            - wind: sfcWind
-            - rain: pr
-            - temperature: tasmax, tas, tasmin (/!\ if overwintering DC, must be tasmax)
-            - relative humidity: hursmax, hurs, hursmin
-
-        k_time: position of the timestep (better than value of the timestep, because of overwintering DC)
-
-        cfg: configuration used for calculation of the FWI
-
-    NB: Used during calculation of the FWI from CMIP6 data.
+    Returns
+    ----------
+    calc: dictionary
+        Variables for computation of the FWI at the current day
     """
     # Preparing the dictionary that will be returned:
     calc = {}
@@ -668,20 +700,17 @@ def function_check_run_file(name_file, cfg):
     """
     Checking if a file has been run and if it is too recent to rerun
 
-    args:
-        name_file: string
-            name of the file to check. Its path is in 'cfg.path_saveFWI'
+    Parameters
+    ----------
+    name_file: string
+        name of the file to check. Its path is in 'cfg.path_saveFWI'
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
 
-        cfg: class
-            Configuration having at least the following properties. can be defined using 'configuration_FWI_CMIP6()'.
-                - path_saveFWI: string
-                    path for the files
-                - option_overwrite: boolean
-                    if True, will try to overwrite files before the date defined in 'overwrite_before'
-                - overwrite_before: string
-                    Date written as '2022-01-01T00:00:00'. Files before that date will always be rewritten.
-
-    NB: Used during calculation of the FWI from CMIP6 data; their regridding; the extraction of annual indicators.
+    Returns
+    ----------
+    run_file: bool
+        If True, this file needs to be run
     """
     if os.path.isfile(cfg.path_saveFWI + os.sep + name_file) == False:
         # file not existing: need to run it
@@ -709,20 +738,21 @@ def func_init_from_scen(item, full_dates, date0, cfg):
     """
     Initializing the FWI from a scenario
 
-    args:
-        item: list of string
-            ESM, Experiment, Ensemble member, Grid
+    Parameters
+    ----------
+    item: list of string
+        ESM, Experiment, Ensemble member, Grid
+    full_dates: dict
+        Dictionnary of dates created in '_calc_FWI-CMIP6.py'
+    date0: timestep, type depends on the CMIP6 run
+        First timestep of the run
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
 
-        full_dates: dict
-            Dictionnary of dates created in '_calc_FWI-CMIP6.py'
-
-        date0: timestep, type depends on the CMIP6 run
-            First timestep of the run
-
-        cfg: class
-            Configuration defined using 'configuration_FWI_CMIP6()'.
-
-    NB: Used during calculation of the FWI from CMIP6 data.
+    Returns
+    ----------
+    out: dict
+        Dictionnary with necessary values for initialization
     """
 
     # dictionary that will be returned:
@@ -785,20 +815,18 @@ def func_init_from_scen(item, full_dates, date0, cfg):
 
 def adhoc_concat2040(item, FWI, cfg):
     """
-    Creating a function to conserve attributes, without merge that takes wayyy too long
+    Creating a dirty function to conserve attributes, without merge that takes wayyy too long
 
-    args:
-        item: list of string
-            ESM, Experiment, Ensemble member, Grid
-
-        FWI: Dataset
-            FWI
-
-        cfg: class
-            Configuration defined using 'configuration_FWI_CMIP6()'.
-
-    NB: Used during calculation of the FWI from CMIP6 data.
+    Parameters
+    ----------
+    item: list of string
+        ESM, Experiment, Ensemble member, Grid
+    FWI: Dataset
+        FWI
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
     """
+
     # loading file for initialization
     esm, xp, member, grid = item
     if cfg.option_full_outputs:

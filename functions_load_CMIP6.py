@@ -71,12 +71,40 @@ dico_warnings_corrections = {
 
 
 def func_prepare_datasets(esm, xp, member, grid, cfg):
+    """
+    Prepares the datasets that will be used for computation of the Fire Weather Index using CMIP6 data.
+        1. Load datasets used as inputs
+        2. Prepare datasets of variables as outputs and intermediary variables
+        3. Checks and corrections
 
-    # loading required variables
-    DATA = {var: load_dataset(esm, xp, member, grid, var, cfg) for var in cfg.list_vars}
+    Parameters
+    ----------
+    esm: str
+        Name of the Earth system model
+    xp: str
+        Name of the experiment
+    member: str
+        Name of the ensemble member
+    grid: str
+        Name of the grid
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
+
+    Returns
+    ----------
+    DATA: dictionary of Dataset
+        Inputs for calculation of the FWI.
+    FWI: Dataset
+        xarray dataset with all output & required intermediary variables
+    """
 
     # ---------------------------
-    # Preparing coordinates
+    # 1. Loading required variables
+    DATA = {var: load_dataset(esm, xp, member, grid, var, cfg) for var in cfg.list_vars}
+    # ---------------------------
+
+    # ---------------------------
+    # 2.a. Preparing coordinates
     # ---------------------------
     FWI = xr.Dataset()
     test_bnds_dims = False
@@ -189,7 +217,7 @@ def func_prepare_datasets(esm, xp, member, grid, cfg):
     # ---------------------------
 
     # ---------------------------
-    # creating variables of interest
+    # 2.b. creating variables of interest
     # ---------------------------
     for var in ["fwi"] + cfg.option_full_outputs * [
         "ffmc",
@@ -224,7 +252,7 @@ def func_prepare_datasets(esm, xp, member, grid, cfg):
     # ---------------------------
 
     # ---------------------------
-    # Corrections
+    # 3. Corrections
     # ---------------------------
     # removing useless stuff poping
     for stf in ["type", "height"]:
@@ -258,7 +286,7 @@ def func_prepare_datasets(esm, xp, member, grid, cfg):
     # ---------------------------
 
     # ---------------------------
-    # Attributes
+    # 2.c. Attributes
     # ---------------------------
     # General attributes of this dataset
     for att in [
@@ -306,6 +334,30 @@ def func_prepare_datasets(esm, xp, member, grid, cfg):
 
 
 def load_dataset(esm, xp, member, grid, var, cfg):
+    """
+    Load a dataset used as input, with some checks.
+
+    Parameters
+    ----------
+    esm: str
+        Name of the Earth system model
+    xp: str
+        Name of the experiment
+    member: str
+        Name of the ensemble member
+    grid: str
+        Name of the grid
+    var: str
+        Name of the variable to load
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
+
+    Returns
+    ----------
+    OUT: Dataset
+        xarray dataset with loaded variable
+    """
+
     print(
         "loading files of " + esm + ", " + xp + ", " + member + ", " + grid + ", " + var
     )
@@ -342,6 +394,20 @@ def load_dataset(esm, xp, member, grid, var, cfg):
 
 
 def update_time_format(data):
+    """
+    Correcting the time axis of the data if np.datetime64, because not handled correctly after 2262.
+
+    Parameters
+    ----------
+    data: dataset
+        Dataset to correct.
+
+    Returns
+    ----------
+    data: Dataset
+        Corrected dataset.
+    """
+
     if type(data.time.values[0]) in [np.datetime64]:
         # doing time
         new_time = []
@@ -401,6 +467,26 @@ def update_time_format(data):
 
 
 def shift_time(data_fwi, data, mode):
+    """
+    Shift the time axis for files that have been marked for it.
+
+    Parameters
+    ----------
+    data_fwi: dataset
+        Dataset output to correct.
+    DATA: dataset
+        Dataset input to correct.
+    mode: str
+        Type of correction to bring:
+            - "one-day": shifts the time axis by one day
+            - "one-half-day": shifts the time axis by 12 hours
+    Returns
+    ----------
+    data_fwi: dataset
+        Corrected dataset output.
+    DATA: dataset
+        Corrected dataset input.
+    """
     # TIME
     tt = data_fwi.time.values
     format_tt = type(tt[0])

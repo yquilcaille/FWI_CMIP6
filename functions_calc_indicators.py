@@ -30,19 +30,23 @@ def calc_indicators(
     """
     Computes annual indicators of the FWI from daily FWI values over several experiences.
 
+    Parameters
+    ----------
     dat: DataArray
         daily FWI (xp,time,lat,lon)
-
     ref_period: tuple
         (start_date, end_date, ref_experiment) defining the reference period. Used for fwils and fwixd.
-
     indics: list of str
         Indicators that will he computed: 'fwixx', 'fwils', 'fwixd','fwisa'
-
     method_fwixd: str
         defines the method used for the calculation of fwixd:
             'percentile-XX': calculation of the local threshold based on the XX percentile over the reference period
             'category-YY': pre-defined threshold from dico_bounds_dangers
+
+    Returns
+    ----------
+    OUT: Dataset
+        xarray dataset with all annual indicators.
     """
     # prepare dataset
     OUT = xr.Dataset()
@@ -147,11 +151,19 @@ def calc_indicators(
 
 def dangers_classes_fwi(fwi, categ):
     """
+    Computes fire dangers under preset category for fire dangers.
+
+    Parameters
+    ----------
     fwi: DataArray
         daily FWI
-
     category: str
         must be within [ALL, very low, low, moderate, high, very high, extreme]
+
+    Returns
+    ----------
+    danger: DataArray
+        xarray dataset that uses a preset category of classes for fire dangers.
     """
     if categ == "ALL":
         raise Exception("Way too long at the moment, rewrite for xarray")
@@ -172,6 +184,8 @@ def calc_indic_fwixx(dat):
     Calculate the annual maxima of the FWI.
     Similar to https://doi.org/10.1029/2018GL080959: just take max over the year
 
+    Parameters
+    ----------
     dat: DataArray
         daily FWI
     """
@@ -189,16 +203,14 @@ def calc_indic_fwils(dat, day_start, day_end, ref_xp):
     3. sum over the days for each year.
 
     NB: this definition of the fire season is independant from the definition used for overwintering DC.
-
+    Parameters
+    ----------
     dat: DataArray
         daily FWI
-
     day_start: same type as time in dat
         day in dat for the beginning of the reference period
-
     day_end: same type as time in dat
         day in dat for the end of the reference period
-
     ref_xp: list of str
         experiment(s) to consider for the reference period
     """
@@ -216,20 +228,16 @@ def calc_indic_fwixd(dat, day_start, day_end, ref_xp, method):
         - using preset categories of the FWI
         - number of days above the 95th percentile: https://doi.org/10.1029/2018GL080959
 
+    Parameters
+    ----------
     dat: DataArray
         daily FWI
-
     day_start: same type as time in dat
         day in dat for the beginning of the reference period
-
     day_end: same type as time in dat
         day in dat for the end of the reference period
-
     ref_xp: list of str
         experiment(s) to consider for the reference period
-
-    method: str
-        either 'category' or 'percentile'
     """
     if "category" in method:
         lvl = str.split(method, "-")[1]
@@ -253,6 +261,8 @@ def calc_indic_fwisa(dat):
     Calculate the seasonal average of the FWI, defined as the annual peak 90-day mean.
     Similar to https://doi.org/10.1029/2018GL080959
 
+    Parameters
+    ----------
     dat: DataArray
         daily FWI
     """
@@ -266,17 +276,16 @@ def np_interpolate_nan_grid(array, lat_mesh, lon_mesh, method="linear"):
     """
     Fill in the NaN of a numpy array
 
-        array: numpy array
-            2D data having NaN
-
-        lat_mesh: numpy array
-            latitude with the same shape as array
-
-        lon_mesh: numpy array
-            longitude with the same shape as array
-
-        method: str
-            method for interpolation: 'nearest', 'linear', 'cubic'
+    Parameters
+    ----------
+    array: numpy array
+        2D data having NaN
+    lat_mesh: numpy array
+        latitude with the same shape as array
+    lon_mesh: numpy array
+        longitude with the same shape as array
+    method: str
+        method for interpolation: 'nearest', 'linear', 'cubic'
     """
     # mask invalid values
     array = np.ma.masked_invalid(array)
@@ -299,13 +308,13 @@ def xr_interpolate_nan_grid(data, method="linear"):
     """
     Fill in the NaN in a DataArray using interpolation.
 
-        data: DataArray
-            Data having at least the coordinates 'lat' and 'lon'
-
-        method: str
-            method for interpolation: 'nearest', 'linear', 'cubic'
+    Parameters
+    ----------
+    data: DataArray
+        Data having at least the coordinates 'lat' and 'lon'
+    method: str
+        method for interpolation: 'nearest', 'linear', 'cubic'
     """
-
     # preparing coordinates
     la = np.arange(0, data.lat.size)
     lo = np.arange(0, data.lon.size)
@@ -335,25 +344,22 @@ def xr_interpolate_nan_grid(data, method="linear"):
 def func_save_xp(full_data, xp, indic, path_save, attrs_out, check_NaN=True):
     """
     Function saving the required data
-        full_data: Dataset
-            full dataset of outputs
 
-        xp: str
-            specific experiment to save
-
-        indic: str
-            specific annual indicator to save
-
-        path_save: str
-            full path where the file will be saved. Name of the file included.
-
-        attrs_out: dict
-            global attributes to transfer
-
-        check_NaN: str
-            what to do with NaN. If True, exception if find some. If False, interpolate to fill in these ones.
+    Parameters
+    ----------
+    full_data: Dataset
+        full dataset of outputs
+    xp: str
+        specific experiment to save
+    indic: str
+        specific annual indicator to save
+    path_save: str
+        full path where the file will be saved. Name of the file included.
+    attrs_out: dict
+        global attributes to transfer
+    check_NaN: str
+        what to do with NaN. If True, exception if find some. If False, interpolate to fill in these ones.
     """
-
     # adapting the time axis
     type_time = type(full_data.time.values[0])
     if type_time in [np.datetime64]:

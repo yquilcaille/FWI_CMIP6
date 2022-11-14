@@ -3,10 +3,10 @@ Functions used for the calculation of the Canadian Fire Weather Index, described
 
 A large part of the equations are based on the implementation in https://github.com/buckinha/pyfwi/blob/master/pyFWI/FWIFunctions.py
 Some minor differences were brought by Yann Quilcaille, not affecting the equations:
- - Lawson equations have been removed, they were not necessary for our purpose.
+ - Lawson equations have been removed, they were not necessary for the calculation of the FWI on CMIP6 data.
  - The code is generalized, now handling not only scalar, but also arrays. This is essential to speed up the computation of large datasets.
- - Handling RH < 0 and WIND < 0
- - Handling exceptions with DMC and DC both 0, causing the BUI to become a non-attributed value. It happens for Rain > 2.8, Temp in [-2.8, -1.1] and some more complex conditions (Dr <= 0, pr <= 0).
+ - Handling the issues RH < 0 and WIND < 0
+ - Handling exceptions with DMC and DC both 0, causing the BUI to become a non-attributed value. It happens for Rain > 2.8 and Temp in [-2.8, -1.1] and some more complex conditions (Dr <= 0, pr <= 0).
  - Handling exception of FFMC > 101 in ISI (due to the approximation of a coefficient in FFMC: 101 * 147.2 / 59.5 ~=250 )
  
 The initial equations have also been edited in the following ways by Yann Quilcaille:
@@ -30,7 +30,9 @@ import numpy as np
 
 
 class InvalidLatitude(Exception):
-    """Exception to handle variables not covered by DataDict"""
+    """
+    Exception to handle variables not covered by DataDict
+    """
 
     def __init__(self, value):
         self.value = value
@@ -42,6 +44,24 @@ class InvalidLatitude(Exception):
 def FFMC(TEMP, RH, WIND, RAIN, FFMCPrev):
     """
     Calculates today's Fine Fuel Moisture Code
+
+    Parameters
+    ----------
+    TEMP: array
+        Temperature of the day at noon (celsius)
+    RH: array
+        Relative humidity of the day at noon (%)
+    WIND: array
+        Wind speed of the day at noon  (km/h)
+    RAIN: array
+        24-hour accumulated rainfall at noon (mm)
+    FFMCPrev: array
+        Previous day's FFMC (1)
+
+    Returns
+    ----------
+    FFMC: array
+        FFMC on this day (1)
     """
 
     # preparing initial value mo
@@ -111,6 +131,30 @@ def FFMC(TEMP, RH, WIND, RAIN, FFMCPrev):
 def DMC(TEMP, RH, RAIN, DMCPrev, LAT, numb_day, MONTH, cfg):
     """
     Calculates today's Duff Moisture Code
+
+    Parameters
+    ----------
+    TEMP: array
+        Temperature of the day at noon (celsius)
+    RH: array
+        Relative humidity of the day at noon (%)
+    RAIN: array
+        24-hour accumulated rainfall at noon (mm)
+    DMCPrev: array
+        Previous day's DMC (1)
+    LAT: array
+        Latitude in decimal degrees of the location (degree North)
+    NUMB_DAY: scalar
+        Number of the day in the year
+    MONTH: int
+        numeral month, from 1 to 12
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
+
+    Returns
+    ----------
+    DMC: array
+        DMC on this day (1)
     """
 
     # Changing DMCPrev
@@ -158,7 +202,27 @@ def DMC(TEMP, RH, RAIN, DMCPrev, LAT, numb_day, MONTH, cfg):
 
 def DC(TEMP, RAIN, DCPrev, LAT, MONTH, cfg):
     """
-    Calculates today's Drought Code Parameters
+    Calculates today's Drought Code
+
+    Parameters
+    ----------
+    TEMP: array
+        Temperature of the day at noon (celsius)
+    RAIN: array
+        24-hour accumulated rainfall at noon (mm)
+    DCPrev: array
+        Previous day's DMC (1)
+    LAT: array
+        Latitude in decimal degrees of the location (degree North)
+    MONTH: int
+        numeral month, from 1 to 12
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
+
+    Returns
+    ----------
+    DC: array
+        DC on this day (1)
     """
 
     # Updating DCPrev
@@ -192,6 +256,18 @@ def DC(TEMP, RAIN, DCPrev, LAT, MONTH, cfg):
 def ISI(WIND, FFMC):
     """
     Calculates today's Initial Spread Index
+
+    Parameters
+    ----------
+    WIND: array
+        Wind speed of the day at noon  (km/h)
+    FFMC: array
+        Fine Fuel Moisture Code of the day (1)
+
+    Returns
+    ----------
+    ISI: array
+        ISI on this day (1)
     """
 
     fWIND = np.exp(0.05039 * WIND)
@@ -208,6 +284,18 @@ def ISI(WIND, FFMC):
 def BUI(DMC, DC):
     """
     Calculates today's Buildup Index
+
+    Parameters
+    ----------
+    DMC: array
+        Duff Moisture Code of the day (1)
+    DC: array
+        Drought Code of the day (1)
+
+    Returns
+    ----------
+    BUI: array
+        BUI on this day (1)
     """
 
     # Preparing U
@@ -259,6 +347,18 @@ def BUI(DMC, DC):
 def FWI(ISI, BUI):
     """
     Calculates today's Fire Weather Index
+
+    Parameters
+    ----------
+    ISI: array
+        ISI on this day (1)
+    BUI: array
+        BUI on this day (1)
+
+    Returns
+    ----------
+    FWI: array
+        FWI on this day (1)
     """
 
     # Preparing fD
@@ -285,6 +385,30 @@ def FWI(ISI, BUI):
 
 
 def DryingFactor(Latitude, Month, cfg):
+    """
+    Calculates the Drying Factor.
+    NB: this parameter is called "Day-length adjustment in DC". This name is not used here because of the adjustments on the parameter "Effective day-length" used in DMC.
+
+    Option for the drying factor from cfg.adjust_DryingFactor:
+        - 'original': values for the Northern hemisphere applied everywhere (Wagner et al, 1987: https://cfs.nrcan.gc.ca/pubwarehouse/pdfs/19927.pdf)
+        - 'NSH': the values for the Southern hemisphere are those for the northern shifted by 6 months (https://github.com/buckinha/pyfwi/blob/master/pyFWI/FWIFunctions.py)
+        - 'NSHeq': the same idea is applied, but near the equator, one same value is applied for all months (https://rdrr.io/rforge/cffdrs/src/R/dcCalc.R)
+
+    Parameters
+    ----------
+    Latitude: array
+        Latitude in decimal degrees of the location (degree North)
+    Month: int
+        numeral month, from 1 to 12
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
+
+    Returns
+    ----------
+    DryingFactor: array
+        Drying Factor (1)
+    """
+
     if len(np.array(Month).shape) > 0:
         raise Exception(
             "This code has been rewritten so that only the month must be a scalar... dont know what to do if there are multiple values."
@@ -327,7 +451,30 @@ def DryingFactor(Latitude, Month, cfg):
 
 
 def DayLength(Latitude, numb_day, MONTH, cfg):
-    """Approximates the length of the day given month and latitude"""
+    """
+    Calculates the effective Day Length
+    Option for the effective day length cfg.adjust_DayLength:
+        - 'original': values adapted for Canadian latitudes, depends on the month (Wagner et al, 1987: https://cfs.nrcan.gc.ca/pubwarehouse/pdfs/19927.pdf)
+        - 'bins': depends on 4 bins of latitudes and the month (https://github.com/buckinha/pyfwi/blob/master/pyFWI/FWIFunctions.py)
+        - 'continuous': depends continuously on latitude and the day of the year (https://github.com/NCAR/fire-indices & https://www.ncl.ucar.edu/Document/Functions/Crop/daylight_fao56.shtml)
+
+
+    Parameters
+    ----------
+    Latitude: array
+        Latitude in decimal degrees of the location (degree North)
+    numb_day: scalar
+        Number of the day in the year
+    Month: int
+        numeral month, from 1 to 12
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
+
+    Returns
+    ----------
+    DayLength: array
+        Day Length (h)
+    """
 
     if cfg.adjust_DayLength == "original":
         DayLength46N = [6.5, 7.5, 9.0, 12.8, 13.9, 13.9, 12.4, 10.9, 9.4, 8.0, 7.0, 6.0]
@@ -372,22 +519,33 @@ def DayLength(Latitude, numb_day, MONTH, cfg):
 
 def test_FireSeason(TEMP_wDC, SeasonActive, threshold_start=12, threshold_end=5):
     """
-    Calculation whether the fire season is active or not. Based on Wotton & Flannigan 1993 method, as written in https://rdrr.io/github/jordan-evens-nrcan/cffdrs/src/R/fireSeason.r
-    NB: because of the size of the datasets, we choose not to use exactly dask xarray, but a more explicit loop
-    #tmp = test.where( test > threshold_start, drop=True )
-    #d_start = tmp.time.groupby(tmp.time.dt.year).min('time')
-    #tmp = test.where( test < threshold_end, drop=True )
-    #d_end = tmp.time.groupby(tmp.time.dt.year).max('time')
+    Calculation whether the fire season is active or not.
+    Based on Wotton & Flannigan 1993 method, as written in https://rdrr.io/github/jordan-evens-nrcan/cffdrs/src/R/fireSeason.r
 
-    Args:
-        TEMP_wDC: tasmax over 2 days before, the current day and the next 2 days
-        SeasonActive: boolean to say where the Fire Season was already assumed to be active
-        threshold_start: tasmax (degC) where fire season is assumed to start
-        threshold_end: tasmax (degC) where fire season is assumed to end
+    NB: because of the size of the datasets, we choose to use a more explicit loop, instead of using dask xarrays:
+        tmp = test.where( test > threshold_start, drop=True )
+        d_start = tmp.time.groupby(tmp.time.dt.year).min('time')
+        tmp = test.where( test < threshold_end, drop=True )
+        d_end = tmp.time.groupby(tmp.time.dt.year).max('time')
 
-    Return:
-        dates_fireseason: (year, lat, lon)
+
+    Parameters
+    ----------
+    TEMP_wDC: array
+        Temperature at noon over 2 days before, the current day and the next 2 days (celsius)
+    SeasonActive: array
+        Boolean providing information on where the Fire Season is active on the former day (bool)
+    threshold_start: scalar
+        Threshold in temperature at noon (celsius): if the temperature is above for the 2 former days and the current day, the fire season is assumed to start.
+    threshold_end: scalar
+        Threshold in temperature at noon (celsius): if the temperature is below for the current day and the 2 next days, the fire season is assumed to end.
+
+    Returns
+    ----------
+    val_SA: array
+        Boolean providing information on where the Fire Season is active on the current day (bool)
     """
+
     # warning, numpy or xarray dont accept to affect values if writing variable[ind1][ind2] = values
     # hence writing in a somewhat convoluted manner
     val_SA = np.copy(SeasonActive)
@@ -435,14 +593,30 @@ def test_FireSeason(TEMP_wDC, SeasonActive, threshold_start=12, threshold_end=5)
 
 def wDC(DCf, rw, a=0.75, b=0.75):
     """
-    Computes the over wintering Drought Code (DC) value. All variables names are laid out in the same manner as Lawson & Armitage (2008) (http://cfs.nrcan.gc.ca/pubwarehouse/pdfs/29152.pdf)
-    Args:
-        DCf: Final Fall DC Value
-        rw : winter precipitation (mm)
-        a  : user-selected value accounting for carry-over fraction
-        b  : user-selected value accounting for wetting efficiency fraction
-    Returns:
-        DCs: Overwintered Drought Code (Spring startup DC value)
+    Computes the overwintering Drought Code (DC) value. All variables names are laid out in the same manner as Lawson & Armitage (2008) (http://cfs.nrcan.gc.ca/pubwarehouse/pdfs/29152.pdf).
+
+    Parameters
+    ----------
+    DCf: array
+        "Final Fall DC Value": values of DC at the end of the last fire season (1)
+    rw: array
+        "Winter precipitation": precipitations accumulated over the last non-fire season (mm)
+    a: scalar
+        user-selected value accounting for carry-over fraction (1). Default here is the median value from Lawson & Armitage (2008).
+        1.0  : Daily DCa calculated up to 1 November, continuous snow cover, or freeze-up, whichever comes first
+        0.75 : Daily DC calculations stopped before any of the above conditons met or the area is subject to occasional winter chinook conditions, leaving the ground bare and subject to moisture depletion
+        0.5  : Forested areas subject to long periods in fall or winter that favor depletion of soil moisture Effectiveness of winter precipitation in recharging moisture reserves in spring
+
+    b: scalar
+        user-selected value accounting for wetting efficiency fraction (1). Default here is the median value from Lawson & Armitage (2008).
+        0.9  : Poorly drained, boggy sites with deep organic layers
+        0.75 : Deep ground frost does not occur until late fall, if at all; moderately drained sites that allow infiltration of most of the melting snowpack
+        0.5  : Chinook-prone areas and areas subject to early and deep ground frost; well-drained soils favoring rapid percolation or topography favoring rapid runoff before melting of ground frost
+
+    Returns
+    ----------
+    DCs: array
+        Overwintered Drought Code, i.e. Spring startup DC value (1)
     """
     # Eq. 3 - Final fall moisture equivalent of the DC
     Qf = 800 * np.exp(-DCf / 400)
@@ -469,7 +643,8 @@ def DC_with_overwintering(
     cfg,
 ):
     """
-    Cases for DC: (IMPORTANT, the initialization of whether the fire season is active is set to False)
+    Computes the overwintered Drought Code (DC) value. Many different cases have to be considered:
+    Cases for DC: (Important, the initialization of whether the fire season is active is set to False)
         1. Former day: Fire Season Active
             1.1. Current day: Fire Season Active
                 --> LOCAL SUMMER: calculates **DC normally**
@@ -492,6 +667,47 @@ def DC_with_overwintering(
     FWI can be calculated where walues for DC are correctly known, that is to say:
         - where the Fire Season Active, be it in the first fire season or not
         - where the Fire Season is not active, BUT no fire season happened there before, preventing of correctly overwintering DC.
+
+    Parameters
+    ----------
+    TEMP_wDC: array
+        Temperature at noon over 2 days before, the current day and the next 2 days (celsius)
+    FormerSeasonActive: array
+        Boolean providing information on where the Fire Season is active on the former day (bool)
+    rw: array
+        "Winter precipitation": precipitations accumulated over the last non-fire season (mm)
+    dcf: array
+        "Final Fall DC Value": values of DC at the end of the last fire season (1)
+    CounterSeasonActive: array
+        Counting the number of elapsed fire seasons.
+    dcPREV: array
+        Previous day's DMC (1)
+    TEMP: array
+        Temperature of the day at noon (celsius)
+    RAIN: array
+        24-hour accumulated rainfall at noon (mm)
+    LAT: array
+        Latitude in decimal degrees of the location (degree North)
+    MONTH: int
+        numeral month, from 1 to 12
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
+
+    Returns
+    ----------
+    dictionary to carry on the calculations
+        dc: array
+            Current day's DMC (1)
+        CurrentSeasonActive: array
+            Boolean providing information on where the Fire Season is active on the current day (bool)
+        rw: array
+            "Winter precipitation": updated precipitations accumulated over the last non-fire season (mm)
+        dcf: array
+            "Final Fall DC Value": updated values of DC at the end of the last fire season (1)
+        CounterSeasonActive: array
+            Updated counter for the number of elapsed fire seasons.
+        ind_calc_FWI: array
+            Boolean indicating where the FWI has to be calculated, i.e. when fire season is active or before the very first fire season had started (for initialization purposes)
     """
     # warning, numpy or xarray dont accept to affect values if writing variable[ind1][ind2] = values
     # hence writing in a somewhat convoluted manner
@@ -582,21 +798,50 @@ def DC_with_overwintering(
 
 def calcFWI(vars_calc, cfg):
     """
-    Calculates today's FWI
-    PARAMETERS
+    Global function for the calculation of today's Fire Weather Index using today's climate variables and former day's variables.
+
+    Parameters
     ----------
-    inputs is a dictionary with these keys: MONTH,TEMP,RH,WIND,RAIN,LAT,NUMB_DAY
-        - NUMB_DAY is the number of the day in the year
-        - MONTH is the numeral month, from 1 to 12
-        - TEMP is the 12:00 LST temperature in degrees celsius
-        - RH is the 12:00 LST relative humidity in %
-        - WIND is the 12:00 LST wind speed in kph
-        - RAIN is the 24-hour accumulated rainfall in mm, calculated at 12:00 LST
-    PREV is a dictionary with these keys: FFMCPrev,DMCPrev,DCPrev
-        - FFMCPrev is the previous day's FFMC
-        - DMCPrev is the previous day's DCM
-        - DCPrev is the previous day's DC
-        - LAT is the latitude in decimal degrees of the location for which calculations are being made
+    vars_calc: dictionary
+        Variables for computation of the FWI.
+        TEMP: array
+            Temperature of the day at noon (celsius)
+        RAIN: array
+            24-hour accumulated rainfall at noon (mm)
+        RH: array
+            Relative humidity of the day at noon (%)
+        WIND: array
+            Wind speed of the day at noon  (km/h)
+        FFMCPrev: array
+            Previous day's FFMC (1)
+        DCPrev: array
+            Previous day's DC (1)
+        DMCPrev: array
+            Previous day's DMC (1)
+        LAT: array
+            Latitude in decimal degrees of the location (degree North)
+        NUMB_DAY: scalar
+            Number of the day in the year
+        MONTH: int
+            numeral month, from 1 to 12
+        TEMP_wDC: array
+            Only if overwintering is required: Temperature at noon over 2 days before, the current day and the next 2 days (celsius)
+        SeasonActive: array
+            Only if overwintering is required: Boolean providing information on where the Fire Season is active on the former day (bool)
+        rw: array
+            Only if overwintering is required: "Winter precipitation": updated precipitations accumulated over the last non-fire season (mm)
+        DCf: array
+            Only if overwintering is required: "Final Fall DC Value": updated values of DC at the end of the last fire season (1)
+        CounterSeasonActive: array
+            Only if overwintering is required: Updated counter for the number of elapsed fire seasons.
+
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
+
+    Returns
+    ----------
+    vars_calc: dictionnary
+        Input "vars_calc" is updated over all its values.
     """
     # directly correcting for spurious values in RAIN, RH and WIND
     vars_calc = corrections_vars(vars_calc)
@@ -677,6 +922,24 @@ def calcFWI(vars_calc, cfg):
 
 
 def corrections_vars(vars_c):
+    """
+    Correct variables for calculation of the FWI.
+
+    Parameters
+    ----------
+    vars_c: dictionary
+        Variables to correct.
+        RH: array
+            Relative humidity of the day at noon (%)
+        WIND: array
+            Wind speed of the day at noon  (km/h)
+
+    Returns
+    ----------
+    vars_c: dictionnary
+        "vars_c" is corrected over all its values.
+    """
+
     # Preparing Relative Humidity
     vars_c["RH"][np.where(vars_c["RH"] > 100)] = 100
     vars_c["RH"][np.where(vars_c["RH"] < 0)] = 0
@@ -690,6 +953,38 @@ def corrections_vars(vars_c):
 
 
 def init_prev_values(data, cfg):
+    """
+    Initialize values for calculation of the FWI, accordingly to Wagner et al, 1987 (https://cfs.nrcan.gc.ca/pubwarehouse/pdfs/19927.pdf).
+
+    Parameters
+    ----------
+    data: xarrays
+        Data produced by "func_prepare_datasets". Could actually be simply lat & lon.
+
+    cfg: class configuration_FWI_CMIP6
+        Class used to carry information on which calculations have to be performed, specifically on options for adjustments.
+
+    Returns
+    ----------
+    var_calc: dictionnary
+        FFMC: array
+            set at 85 (1).
+        DC: array
+            set at 15 (1).
+        DMC: array
+            set at 6 (1).
+        TEMP_wDC: None
+            Only if overwintering is required. Set at None.
+        SeasonActive: None
+            Only if overwintering is required. Set at None.
+        DCf: None
+            Only if overwintering is required. Set at None.
+        rw: None
+            Only if overwintering is required. Set at None.
+        CounterSeasonActive: None
+            Only if overwintering is required. Set at None.
+    """
+
     # prepare the dictionary that will be returned
     var_calc = {}
 
