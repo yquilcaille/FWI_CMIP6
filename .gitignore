@@ -8,3 +8,4 @@ figures
 .ipynb_checkpoints
 __pycache__
 stash.py
+.gitignore

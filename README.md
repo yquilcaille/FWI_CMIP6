@@ -1,6 +1,6 @@
 Scripts used for the computation of the Canadian Fire Weather Index (FWI) under data from the Climate Model Intercomparison Project Phase 6 (CMIP6). These scripts are developed in Python 3.7. The primary reason for sharing this code is replication by other users. No support of any kind is guaranteed, but feel free to ask. Any feedbacks and contributions are welcome.
 
-Using this code is encouraged, but please acknowledge the authors.
+Using this code is encouraged, but please acknowledge the authors. A paper will be submitted very shortly and its correponding DOI will be added here. A second DOI is coming soon for the data calculated with this code.
 
 This code comes into several components:
  * Computation of the FWI:
@@ -17,8 +17,16 @@ This code comes into several components:
  * Mask for infrequent burning:
 	- "_mask_infreq_burning.py": calculates the mask for chosen grids.
  * Plots of FWI on CMIP6 data:
-	- "_plots_FWI.py": plots used for representation of the FWI in CMIP6 runs.
+	- "_plots_FWI.py": plots used for representation of the FWI in CMIP6 runs (DOI coming soon).
 	- "functions_support_plot.py": functions used for the plots.
 
 
-Requirements on packages: cartopy (0.20.2), cftime (1.6.1), matplotlib (3.5.2), numpy (1.23.1), pandas (1.4.3), regionmask (0.9.0), seaborn (0.11.2), xarray (2022.6.0)
+Requirements on packages:
+ - cartopy (0.20.2)
+ - cftime (1.6.1)
+ - matplotlib (3.5.2)
+ - numpy (1.23.1)
+ - pandas (1.4.3)
+ - regionmask (0.9.0)
+ - seaborn (0.11.2)
+ - xarray (2022.6.0)
