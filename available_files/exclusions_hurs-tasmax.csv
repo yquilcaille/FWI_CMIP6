@@ -82,7 +82,7 @@ MIROC-ES2L,ssp534-over,r1i1p1f2,gn,supposed to start in 2040 but start in 2015 w
 MPI-ESM-1-2-HAM,ssp370,r1i1p1f1,gn,variables only up to 2055
 MPI-ESM-1-2-HAM,ssp370,r2i1p1f1,gn,variables only up to 2055
 MPI-ESM-1-2-HAM,ssp370,r3i1p1f1,gn,variables only up to 2055
-NorESM2-LM,ssp126,r1i1p1f1,gn,missing days in hurs, pr and tasmax
+NorESM2-LM,ssp126,r1i1p1f1,gn,missing days in hurs pr and tasmax
 NorESM2-LM,ssp370,r2i1p1f1,gn,only 2015 to 2054
 NorESM2-LM,ssp370,r3i1p1f1,gn,only 2015 to 2054
 NorESM2-MM,historical,r3i1p1f1,gn, missing 1943.6.22 to 1949.12.12

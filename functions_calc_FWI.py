@@ -1,7 +1,7 @@
 """
 Functions used for the calculation of the Canadian Fire Weather Index, described in Wang et al, 2015 (https://cfs.nrcan.gc.ca/publications?id=36461).
 
-A large part of the equations are based on the implementation in https://github.com/buckinha/pyfwi/blob/master/pyFWI/FWIFunctions.py
+A large part of the equations are based on the implementation in https://github.com/buckinha/pyfwi/blob/master/pyFWI/FWIFunctions.py (license imported).
 Some minor differences were brought by Yann Quilcaille, not affecting the equations:
  - Lawson equations have been removed, they were not necessary for the calculation of the FWI on CMIP6 data.
  - The code is generalized, now handling not only scalar, but also arrays. This is essential to speed up the computation of large datasets.

@@ -1,7 +1,8 @@
-Scripts used for the computation of the Canadian Fire Weather Index (FWI) under data from the Climate Model Intercomparison Project Phase 6 (CMIP6). These scripts are developed in Python 3.7. The primary reason for sharing this code is replication by other users. No support of any kind is guaranteed, but feel free to ask. Any feedbacks and contributions are welcome.
+The Canadian Fire Weather Index (FWI) is a commonly used index to calculate and assess the fire weather. Several packages have proposed different adjustments to the initial algorithm of the FWI. We have gathered these improvements to provide an algorithm that can be used globally. This code has been used to calculate the FWI using all available simulations of the Climate Model Intercomparison Project Phase 6 (CMIP6). The daily FWI has then been summarized into four annual indicators: (i) maximum value of the FWI (fwixx), (ii) number of days with extreme fire weather (fwixd), (iii) length of the fire season (fwils), and (iv) seasonal average of the FWI (fwisa). The corresponding publication is available at https://doi.org/10.5194/essd-2022-413 while the database is available at https://doi.org/10.3929/ethz-b-000583391. 
 
-Using this code is encouraged, but please acknowledge the authors. A paper will be submitted very shortly and its correponding DOI will be added here. A second DOI is coming soon for the data calculated with this code.
+When using this code, please acknowledge the publication (https://doi.org/10.5194/essd-2022-413).
 
+These scripts are developed in Python 3.7. Instructions on how to use the code and required packages are provided below. Any feedback and contributions are welcome.
 This code comes into several components:
  * Computation of the FWI:
 	- "_calc_FWI-CMIP6.py": calculates the FWI on CMIP6 runs.
